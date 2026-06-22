@@ -23,6 +23,7 @@ function RoundColumn({ title, matchups, matchupMap, onPick, onConfidence }) {
               teamB={data?.teamB}
               winner={data?.winner}
               confidence={data?.confidence}
+              thirdSlot={data?.thirdSlot ?? null}
               onPick={onPick}
               onConfidence={onConfidence}
             />
@@ -33,7 +34,13 @@ function RoundColumn({ title, matchups, matchupMap, onPick, onConfidence }) {
   );
 }
 
-export default function KnockoutBracket({ matchupMap, onPick, onConfidence, onBack }) {
+export default function KnockoutBracket({
+  matchupMap,
+  onPick,
+  onConfidence,
+  onBack,
+  thirdAssignmentValid,
+}) {
   const finalData = matchupMap[FINAL_MATCHUP.id];
   const thirdData = matchupMap[THIRD_PLACE_MATCHUP.id];
 
@@ -43,8 +50,16 @@ export default function KnockoutBracket({ matchupMap, onPick, onConfidence, onBa
         <h2 className="stage-title">Knockout Bracket</h2>
         <p className="stage-subtitle">
           Click a team to pick them as the winner. Rate your confidence with ★ stars after each pick.
+          Third-place slots are auto-assigned using the official 2026 bracket seeding rules.
         </p>
       </div>
+
+      {!thirdAssignmentValid && (
+        <div className="assignment-warning">
+          ⚠️ The selected third-place teams cannot be validly assigned to the bracket slots using the
+          official FIFA seeding rules. Try changing your 3rd-place selections.
+        </div>
+      )}
 
       <div className="bracket-scroll-wrap">
         <div className="bracket-container">

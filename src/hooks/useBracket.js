@@ -8,17 +8,17 @@ import {
   SF_MATCHUPS,
   FINAL_MATCHUP,
   THIRD_PLACE_MATCHUP,
+  THIRD_PLACE_SLOTS,
 } from '../data/teams';
 
 const STORAGE_KEY = 'wc2026_bracket';
 
 const initialState = () => ({
-  // stage: 'group' | 'third-place-selection' | 'knockout'
   stage: 'group',
   userName: 'My 2026 Picks',
   // groupPicks[group] = { first, second, third, fourth (auto) }
   groupPicks: {},
-  // bestThirdPicks: array of up to 8 selected third-place team IDs
+  // bestThirdPicks: ordered array of up to 8 selected third-place team IDs
   bestThirdPicks: [],
   // knockoutPicks[matchId] = { winnerId, confidence (1-5) }
   knockoutPicks: {},
@@ -40,6 +40,14 @@ export function getTeamById(id) {
   return null;
 }
 
+// Return the group letter that a team belongs to
+function getGroupOfTeam(teamId) {
+  for (const [letter, group] of Object.entries(GROUPS)) {
+    if (group.teams.some((t) => t.id === teamId)) return letter;
+  }
+  return null;
+}
+
 // Auto-derive 4th place as the team not picked for 1st/2nd/3rd
 function deriveFourth(group, picks) {
   const taken = [picks.first, picks.second, picks.third].filter(Boolean);
@@ -48,33 +56,77 @@ function deriveFourth(group, picks) {
   return fourth?.id ?? null;
 }
 
-// Resolve a bracket slot to a team object
-function resolveSlot(slot, groupPicks, bestThirdPicks) {
-  const rank = slot[0]; // '1', '2', or 'T'
+// ─── Third-place auto-assignment ─────────────────────────────────────────────
+// Given the 8 selected 3rd-place teams, assign each to one of the 8 R32 slots
+// using backtracking. Each slot has a list of eligible groups; the team from
+// that group (if selected) may fill it.  Returns { matchId: teamId } or null
+// if no valid assignment exists (shouldn't happen with valid FIFA data).
+function computeThirdAssignments(bestThirdPicks) {
+  if (bestThirdPicks.length !== 8) return {};
+
+  // Build group → teamId map for the selected third-place teams
+  const groupToTeam = {};
+  for (const teamId of bestThirdPicks) {
+    const g = getGroupOfTeam(teamId);
+    if (g) groupToTeam[g] = teamId;
+  }
+
+  // Sort slots most-constrained first (fewest eligible teams among those selected)
+  const slots = THIRD_PLACE_SLOTS.map((slot) => ({
+    ...slot,
+    eligible: slot.groups.filter((g) => groupToTeam[g]),
+  })).sort((a, b) => a.eligible.length - b.eligible.length);
+
+  const assignment = {};
+  const used = new Set();
+
+  function solve(idx) {
+    if (idx === slots.length) return true;
+    const slot = slots[idx];
+    for (const g of slot.eligible) {
+      const teamId = groupToTeam[g];
+      if (used.has(teamId)) continue;
+      assignment[slot.matchId] = teamId;
+      used.add(teamId);
+      if (solve(idx + 1)) return true;
+      delete assignment[slot.matchId];
+      used.delete(teamId);
+    }
+    return false;
+  }
+
+  return solve(0) ? assignment : {};
+}
+
+// ─── Matchup map builder ──────────────────────────────────────────────────────
+function resolveRegularSlot(slot, groupPicks) {
+  const rank = slot[0]; // '1' or '2'
   const key = slot.slice(1);
-  if (rank === '1') {
-    const picks = groupPicks[key];
-    return picks?.first ? getTeamById(picks.first) : null;
-  }
-  if (rank === '2') {
-    const picks = groupPicks[key];
-    return picks?.second ? getTeamById(picks.second) : null;
-  }
-  if (rank === 'T') {
-    const idx = parseInt(key, 10) - 1;
-    const id = bestThirdPicks[idx];
-    return id ? getTeamById(id) : null;
-  }
+  const picks = groupPicks[key];
+  if (rank === '1') return picks?.first  ? getTeamById(picks.first)  : null;
+  if (rank === '2') return picks?.second ? getTeamById(picks.second) : null;
   return null;
 }
 
 function buildMatchupMap(groupPicks, bestThirdPicks, knockoutPicks) {
+  const thirdAssignments = computeThirdAssignments(bestThirdPicks);
   const map = {};
 
+  // R32
   for (const m of R32_MATCHUPS) {
+    const teamA = resolveRegularSlot(m.slotA, groupPicks);
+    let teamB;
+    if (typeof m.slotB === 'string') {
+      teamB = resolveRegularSlot(m.slotB, groupPicks);
+    } else {
+      // 3rd-place slot — auto-assigned
+      const assignedId = thirdAssignments[m.id];
+      teamB = assignedId ? getTeamById(assignedId) : null;
+    }
     map[m.id] = {
-      teamA: resolveSlot(m.slotA, groupPicks, bestThirdPicks),
-      teamB: resolveSlot(m.slotB, groupPicks, bestThirdPicks),
+      teamA,
+      teamB,
+      thirdSlot: m.slotB?.t3 ?? null, // eligible groups label (for UI)
       winner: knockoutPicks[m.id]?.winnerId ? getTeamById(knockoutPicks[m.id].winnerId) : null,
       confidence: knockoutPicks[m.id]?.confidence ?? null,
     };
@@ -122,6 +174,7 @@ function buildMatchupMap(groupPicks, bestThirdPicks, knockoutPicks) {
   return map;
 }
 
+// ─── Hook ─────────────────────────────────────────────────────────────────────
 export default function useBracket() {
   const [state, setState] = useState(loadState);
 
@@ -134,23 +187,19 @@ export default function useBracket() {
       const existing = prev.groupPicks[group] || {};
       const updated = { ...existing };
 
-      // Clear this team from any other rank it already occupies
+      // Clear this team from any rank it already holds
       if (teamId) {
-        if (updated.first === teamId && rank !== 'first') updated.first = null;
+        if (updated.first  === teamId && rank !== 'first')  updated.first  = null;
         if (updated.second === teamId && rank !== 'second') updated.second = null;
-        if (updated.third === teamId && rank !== 'third') updated.third = null;
+        if (updated.third  === teamId && rank !== 'third')  updated.third  = null;
       }
 
-      updated[rank] = teamId; // null to deselect
+      updated[rank] = teamId;
       updated.fourth = deriveFourth(group, updated);
 
-      // If 3rd changes, clear bestThirdPicks for that group's old 3rd
-      let bestThirdPicks = prev.bestThirdPicks;
-      if (rank === 'third' || rank === 'first' || rank === 'second') {
-        // Remove any team from this group from bestThirdPicks since 3rd place changed
-        const groupTeamIds = GROUPS[group].teams.map((t) => t.id);
-        bestThirdPicks = bestThirdPicks.filter((id) => !groupTeamIds.includes(id));
-      }
+      // Clear this group's team from bestThirdPicks whenever group rankings change
+      const groupTeamIds = GROUPS[group].teams.map((t) => t.id);
+      const bestThirdPicks = prev.bestThirdPicks.filter((id) => !groupTeamIds.includes(id));
 
       return {
         ...prev,
@@ -195,44 +244,33 @@ export default function useBracket() {
     });
   }, []);
 
-  const setStage = useCallback((stage) => {
-    setState((prev) => ({ ...prev, stage }));
-  }, []);
-
-  const setUserName = useCallback((name) => {
-    setState((prev) => ({ ...prev, userName: name }));
-  }, []);
-
-  const resetAll = useCallback(() => { setState(initialState()); }, []);
+  const setStage    = useCallback((s)    => setState((p) => ({ ...p, stage: s })), []);
+  const setUserName = useCallback((name) => setState((p) => ({ ...p, userName: name })), []);
+  const resetAll    = useCallback(()     => setState(initialState()), []);
 
   const exportJSON = useCallback(() => {
     const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
-    a.href = url;
-    a.download = 'wc2026-bracket.json';
-    a.click();
+    a.href = url; a.download = 'wc2026-bracket.json'; a.click();
     URL.revokeObjectURL(url);
   }, [state]);
 
   const importJSON = useCallback((file) => {
     const reader = new FileReader();
     reader.onload = (e) => {
-      try {
-        const parsed = JSON.parse(e.target.result);
-        setState({ ...initialState(), ...parsed });
-      } catch (_) { alert('Invalid bracket file.'); }
+      try { setState({ ...initialState(), ...JSON.parse(e.target.result) }); }
+      catch (_) { alert('Invalid bracket file.'); }
     };
     reader.readAsText(file);
   }, []);
 
-  // Group is complete when 1st, 2nd, and 3rd are all picked (4th auto-fills)
+  // ── Derived ───────────────────────────────────────────────────────────────
   const groupsComplete = GROUP_LETTERS.every((g) => {
     const p = state.groupPicks[g];
     return p?.first && p?.second && p?.third;
   });
 
-  // Third-place teams come from explicit picks, not derivation
   const thirdPlaceTeams = GROUP_LETTERS.map((g) => {
     const picks = state.groupPicks[g];
     if (!picks?.third) return null;
@@ -241,6 +279,11 @@ export default function useBracket() {
   }).filter(Boolean);
 
   const bestThirdComplete = state.bestThirdPicks.length === 8;
+
+  // Warn if the 8 selected teams can't be validly assigned (rare edge case)
+  const thirdAssignmentValid =
+    !bestThirdComplete || Object.keys(computeThirdAssignments(state.bestThirdPicks)).length === 8;
+
   const matchupMap = buildMatchupMap(state.groupPicks, state.bestThirdPicks, state.knockoutPicks);
   const madeKnockoutPicks = Object.values(state.knockoutPicks).filter((p) => p?.winnerId).length;
 
@@ -260,6 +303,7 @@ export default function useBracket() {
     groupsComplete,
     thirdPlaceTeams,
     bestThirdComplete,
+    thirdAssignmentValid,
     matchupMap,
     progress,
     setGroupPick,

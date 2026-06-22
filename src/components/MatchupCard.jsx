@@ -1,6 +1,37 @@
 import ConfidenceStars from './ConfidenceStars';
 
-export default function MatchupCard({ matchId, teamA, teamB, winner, confidence, onPick, onConfidence, label }) {
+function TeamSlot({ team, isWinner, isLoser, disabled, onClick, tbdLabel }) {
+  return (
+    <button
+      className={`team-slot ${isWinner ? 'team-slot--winner' : ''} ${isLoser ? 'team-slot--loser' : ''}`}
+      onClick={onClick}
+      disabled={disabled}
+    >
+      {team ? (
+        <>
+          <span className="slot-flag">{team.flag}</span>
+          <span className="slot-name">{team.name}</span>
+        </>
+      ) : (
+        <span className="slot-tbd">{tbdLabel ?? 'TBD'}</span>
+      )}
+      {isWinner && <span className="winner-mark">✓</span>}
+    </button>
+  );
+}
+
+export default function MatchupCard({
+  matchId,
+  teamA,
+  teamB,
+  winner,
+  confidence,
+  onPick,
+  onConfidence,
+  label,
+  // For R32 third-place slots: array of eligible group letters e.g. ['A','B','C','D','F']
+  thirdSlot,
+}) {
   const canPick = teamA && teamB;
   const winnerId = winner?.id;
 
@@ -9,43 +40,40 @@ export default function MatchupCard({ matchId, teamA, teamB, winner, confidence,
     onPick(matchId, team.id, confidence ?? 3);
   }
 
+  // Build the TBD label for an unresolved third-place slot
+  const tbdB = thirdSlot && !teamB
+    ? `3rd (${thirdSlot.join('/')})`
+    : null;
+
   return (
-    <div className={`matchup-card ${winner ? 'matchup-card--decided' : ''} ${!canPick ? 'matchup-card--pending' : ''}`}>
+    <div
+      className={[
+        'matchup-card',
+        winner         ? 'matchup-card--decided' : '',
+        !canPick       ? 'matchup-card--pending'  : '',
+      ].join(' ')}
+    >
       {label && <div className="matchup-label">{label}</div>}
+
       <div className="matchup-teams">
-        <button
-          className={`team-slot ${winnerId === teamA?.id ? 'team-slot--winner' : ''} ${winnerId && winnerId !== teamA?.id ? 'team-slot--loser' : ''}`}
-          onClick={() => teamA && handlePick(teamA)}
+        <TeamSlot
+          team={teamA}
+          isWinner={winnerId === teamA?.id}
+          isLoser={!!winnerId && winnerId !== teamA?.id}
           disabled={!canPick}
-        >
-          {teamA ? (
-            <>
-              <span className="slot-flag">{teamA.flag}</span>
-              <span className="slot-name">{teamA.name}</span>
-            </>
-          ) : (
-            <span className="slot-tbd">TBD</span>
-          )}
-          {winnerId === teamA?.id && <span className="winner-mark">▶</span>}
-        </button>
+          onClick={() => teamA && handlePick(teamA)}
+        />
 
         <div className="matchup-vs">vs</div>
 
-        <button
-          className={`team-slot ${winnerId === teamB?.id ? 'team-slot--winner' : ''} ${winnerId && winnerId !== teamB?.id ? 'team-slot--loser' : ''}`}
-          onClick={() => teamB && handlePick(teamB)}
+        <TeamSlot
+          team={teamB}
+          isWinner={winnerId === teamB?.id}
+          isLoser={!!winnerId && winnerId !== teamB?.id}
           disabled={!canPick}
-        >
-          {teamB ? (
-            <>
-              <span className="slot-flag">{teamB.flag}</span>
-              <span className="slot-name">{teamB.name}</span>
-            </>
-          ) : (
-            <span className="slot-tbd">TBD</span>
-          )}
-          {winnerId === teamB?.id && <span className="winner-mark">◀</span>}
-        </button>
+          onClick={() => teamB && handlePick(teamB)}
+          tbdLabel={tbdB}
+        />
       </div>
 
       {winner && (

@@ -206,6 +206,13 @@ body { background: var(--bg); color: var(--text); min-height: 100vh; }
 .third-card__group { display: block; font-size: 11px; color: var(--text-muted); }
 .third-card__check { color: var(--blue); font-weight: 700; font-size: 16px; width: 16px; }
 
+/* ===== Assignment warning ===== */
+.assignment-warning {
+  background: #fef9c3; border: 1.5px solid #fde047; color: #854d0e;
+  border-radius: var(--radius); padding: 10px 16px; margin-bottom: 20px;
+  font-size: 13px; font-weight: 500;
+}
+
 /* ===== Knockout Bracket ===== */
 .knockout-bracket {}
 .bracket-scroll-wrap { overflow-x: auto; padding-bottom: 12px; }
@@ -247,7 +254,7 @@ body { background: var(--bg); color: var(--text); min-height: 100vh; }
 .team-slot--loser { opacity: .45; }
 .slot-flag { font-size: 14px; flex-shrink: 0; }
 .slot-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; }
-.slot-tbd { color: var(--text-muted); font-style: italic; font-size: 11px; }
+.slot-tbd { color: var(--text-muted); font-style: italic; font-size: 10px; white-space: nowrap; }
 .winner-mark { margin-left: auto; font-size: 8px; color: rgba(255,255,255,.7); }
 
 .matchup-confidence { margin-top: 6px; display: flex; justify-content: center; }
