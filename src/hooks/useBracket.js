@@ -294,7 +294,7 @@ export default function useBracket() {
     }).length,
     groupsTotal: 12,
     knockoutDone: madeKnockoutPicks,
-    knockoutTotal: 33,
+    knockoutTotal: 32,
     bestThirdDone: state.bestThirdPicks.length,
   };
 
