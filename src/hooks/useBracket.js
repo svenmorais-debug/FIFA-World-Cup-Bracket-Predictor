@@ -174,6 +174,8 @@ function buildMatchupMap(groupPicks, bestThirdPicks, knockoutPicks) {
   return map;
 }
 
+export { buildMatchupMap };
+
 // ─── Hook ─────────────────────────────────────────────────────────────────────
 export default function useBracket() {
   const [state, setState] = useState(loadState);
@@ -181,6 +183,12 @@ export default function useBracket() {
   useEffect(() => {
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (_) {}
   }, [state]);
+
+  const loadBracketState = useCallback((newState) => {
+    const merged = { ...initialState(), ...newState };
+    setState(merged);
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(merged)); } catch (_) {}
+  }, []);
 
   const setGroupPick = useCallback((group, rank, teamId) => {
     setState((prev) => {
@@ -315,5 +323,6 @@ export default function useBracket() {
     resetAll,
     exportJSON,
     importJSON,
+    loadBracketState,
   };
 }
