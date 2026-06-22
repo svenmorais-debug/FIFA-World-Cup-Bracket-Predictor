@@ -13,6 +13,7 @@ export default function App() {
     groupsComplete,
     thirdPlaceTeams,
     bestThirdComplete,
+    thirdAssignmentValid,
     matchupMap,
     progress,
     setGroupPick,
@@ -134,6 +135,7 @@ export default function App() {
             onPick={setKnockoutPick}
             onConfidence={setConfidence}
             onBack={() => setStage('group')}
+            thirdAssignmentValid={thirdAssignmentValid}
           />
         )}
       </main>
