@@ -241,13 +241,16 @@ body { background: var(--bg); color: var(--text); min-height: 100vh; }
 .bracket-labels__center { color: var(--blue) !important; font-size: 11px !important; }
 
 /* The bracket grid itself */
+.bracket-layout-wrap {
+  overflow: hidden;
+  margin: 0 -24px;
+}
 .bracket-layout {
   display: grid;
   grid-template-columns: repeat(4, 1fr) 148px repeat(4, 1fr);
   height: calc(100vh - 260px);
   min-height: 480px;
-  margin: 0 -24px;
-  overflow: hidden;
+  overflow: visible;
 }
 
 /* Each round is a CSS grid of N equal rows — ensures perfect vertical alignment */

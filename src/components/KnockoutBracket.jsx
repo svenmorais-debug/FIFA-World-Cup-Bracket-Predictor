@@ -99,7 +99,7 @@ export default function KnockoutBracket({
       </div>
 
       {/* ── Bracket grid ── */}
-      <div className="bracket-layout">
+      <div className="bracket-layout-wrap"><div className="bracket-layout">
         {/* Left half: R32 → R16 → QF → SF */}
         <BracketRound
           matchIds={['R32_1','R32_2','R32_3','R32_4','R32_5','R32_6','R32_7','R32_8']}
@@ -153,7 +153,7 @@ export default function KnockoutBracket({
           matchIds={['R32_9','R32_10','R32_11','R32_12','R32_13','R32_14','R32_15','R32_16']}
           rows={8} side="right" matchupMap={matchupMap} onPick={onPick} onConfidence={onConfidence}
         />
-      </div>
+      </div></div>
 
       <div className="stage-footer">
         <button className="btn btn--secondary" onClick={onBack}>← Back to Group Stage</button>
