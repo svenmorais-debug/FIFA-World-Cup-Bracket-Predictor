@@ -130,22 +130,30 @@ export const THIRD_PLACE_SLOTS = R32_MATCHUPS
   .filter(m => m.slotB?.t3)
   .map(m => ({ matchId: m.id, groups: m.slotB.t3 }));
 
+// R16 progression follows official FIFA match numbering (matches 89-96)
+// M89: W74(R32_2) v W77(R32_5)   M90: W73(R32_1) v W75(R32_3)
+// M91: W76(R32_4) v W78(R32_6)   M92: W79(R32_7) v W80(R32_8)
+// M93: W83(R32_11) v W84(R32_12) M94: W81(R32_9) v W82(R32_10)
+// M95: W86(R32_14) v W88(R32_16) M96: W85(R32_13) v W87(R32_15)
 export const R16_MATCHUPS = [
-  { id: 'R16_1', fromA: 'R32_1',  fromB: 'R32_2' },
-  { id: 'R16_2', fromA: 'R32_3',  fromB: 'R32_4' },
-  { id: 'R16_3', fromA: 'R32_5',  fromB: 'R32_6' },
-  { id: 'R16_4', fromA: 'R32_7',  fromB: 'R32_8' },
-  { id: 'R16_5', fromA: 'R32_9',  fromB: 'R32_10' },
-  { id: 'R16_6', fromA: 'R32_11', fromB: 'R32_12' },
-  { id: 'R16_7', fromA: 'R32_13', fromB: 'R32_14' },
-  { id: 'R16_8', fromA: 'R32_15', fromB: 'R32_16' },
+  { id: 'R16_1', fromA: 'R32_2',  fromB: 'R32_5'  }, // M89 Philadelphia
+  { id: 'R16_2', fromA: 'R32_1',  fromB: 'R32_3'  }, // M90 Houston
+  { id: 'R16_3', fromA: 'R32_4',  fromB: 'R32_6'  }, // M91 New York NJ
+  { id: 'R16_4', fromA: 'R32_7',  fromB: 'R32_8'  }, // M92 Mexico City
+  { id: 'R16_5', fromA: 'R32_11', fromB: 'R32_12' }, // M93 Dallas
+  { id: 'R16_6', fromA: 'R32_9',  fromB: 'R32_10' }, // M94 Seattle
+  { id: 'R16_7', fromA: 'R32_14', fromB: 'R32_16' }, // M95 Atlanta
+  { id: 'R16_8', fromA: 'R32_13', fromB: 'R32_15' }, // M96 BC Place Vancouver
 ];
 
+// QF progression (matches 97-100)
+// M97: W89(R16_1) v W90(R16_2)   M98: W93(R16_5) v W94(R16_6)
+// M99: W91(R16_3) v W92(R16_4)   M100: W95(R16_7) v W96(R16_8)
 export const QF_MATCHUPS = [
-  { id: 'QF_1', fromA: 'R16_1', fromB: 'R16_2' },
-  { id: 'QF_2', fromA: 'R16_3', fromB: 'R16_4' },
-  { id: 'QF_3', fromA: 'R16_5', fromB: 'R16_6' },
-  { id: 'QF_4', fromA: 'R16_7', fromB: 'R16_8' },
+  { id: 'QF_1', fromA: 'R16_1', fromB: 'R16_2' }, // M97 Boston
+  { id: 'QF_2', fromA: 'R16_5', fromB: 'R16_6' }, // M98 Los Angeles
+  { id: 'QF_3', fromA: 'R16_3', fromB: 'R16_4' }, // M99 Miami
+  { id: 'QF_4', fromA: 'R16_7', fromB: 'R16_8' }, // M100 Kansas City
 ];
 
 export const SF_MATCHUPS = [
