@@ -16,9 +16,9 @@ const initialState = () => ({
   // stage: 'group' | 'third-place-selection' | 'knockout'
   stage: 'group',
   userName: 'My 2026 Picks',
-  // groupPicks[group] = { first: teamId, second: teamId }
+  // groupPicks[group] = { first, second, third, fourth (auto) }
   groupPicks: {},
-  // bestThird: array of up to 8 selected third-place team IDs
+  // bestThirdPicks: array of up to 8 selected third-place team IDs
   bestThirdPicks: [],
   // knockoutPicks[matchId] = { winnerId, confidence (1-5) }
   knockoutPicks: {},
@@ -32,7 +32,7 @@ function loadState() {
   return initialState();
 }
 
-function getTeamById(id) {
+export function getTeamById(id) {
   for (const g of Object.values(GROUPS)) {
     const t = g.teams.find((t) => t.id === id);
     if (t) return t;
@@ -40,7 +40,15 @@ function getTeamById(id) {
   return null;
 }
 
-// Derive the team that fills a given slot based on groupPicks / bestThirdPicks
+// Auto-derive 4th place as the team not picked for 1st/2nd/3rd
+function deriveFourth(group, picks) {
+  const taken = [picks.first, picks.second, picks.third].filter(Boolean);
+  if (taken.length < 3) return null;
+  const fourth = GROUPS[group].teams.find((t) => !taken.includes(t.id));
+  return fourth?.id ?? null;
+}
+
+// Resolve a bracket slot to a team object
 function resolveSlot(slot, groupPicks, bestThirdPicks) {
   const rank = slot[0]; // '1', '2', or 'T'
   const key = slot.slice(1);
@@ -60,18 +68,14 @@ function resolveSlot(slot, groupPicks, bestThirdPicks) {
   return null;
 }
 
-// Build a map from matchId -> { teamA, teamB } for all rounds
 function buildMatchupMap(groupPicks, bestThirdPicks, knockoutPicks) {
   const map = {};
 
-  // R32
   for (const m of R32_MATCHUPS) {
     map[m.id] = {
       teamA: resolveSlot(m.slotA, groupPicks, bestThirdPicks),
       teamB: resolveSlot(m.slotB, groupPicks, bestThirdPicks),
-      winner: knockoutPicks[m.id]?.winnerId
-        ? getTeamById(knockoutPicks[m.id].winnerId)
-        : null,
+      winner: knockoutPicks[m.id]?.winnerId ? getTeamById(knockoutPicks[m.id].winnerId) : null,
       confidence: knockoutPicks[m.id]?.confidence ?? null,
     };
   }
@@ -85,45 +89,34 @@ function buildMatchupMap(groupPicks, bestThirdPicks, knockoutPicks) {
     if (!pick?.winnerId) return null;
     const m = map[id];
     if (!m) return null;
-    if (m.teamA?.id === pick.winnerId) return m.teamB;
-    return m.teamA;
+    return m.teamA?.id === pick.winnerId ? m.teamB : m.teamA;
   };
 
   for (const m of R16_MATCHUPS) {
     map[m.id] = {
-      teamA: winnerOf(m.fromA),
-      teamB: winnerOf(m.fromB),
-      winner: winnerOf(m.id),
-      confidence: knockoutPicks[m.id]?.confidence ?? null,
+      teamA: winnerOf(m.fromA), teamB: winnerOf(m.fromB),
+      winner: winnerOf(m.id), confidence: knockoutPicks[m.id]?.confidence ?? null,
     };
   }
   for (const m of QF_MATCHUPS) {
     map[m.id] = {
-      teamA: winnerOf(m.fromA),
-      teamB: winnerOf(m.fromB),
-      winner: winnerOf(m.id),
-      confidence: knockoutPicks[m.id]?.confidence ?? null,
+      teamA: winnerOf(m.fromA), teamB: winnerOf(m.fromB),
+      winner: winnerOf(m.id), confidence: knockoutPicks[m.id]?.confidence ?? null,
     };
   }
   for (const m of SF_MATCHUPS) {
     map[m.id] = {
-      teamA: winnerOf(m.fromA),
-      teamB: winnerOf(m.fromB),
-      winner: winnerOf(m.id),
-      confidence: knockoutPicks[m.id]?.confidence ?? null,
+      teamA: winnerOf(m.fromA), teamB: winnerOf(m.fromB),
+      winner: winnerOf(m.id), confidence: knockoutPicks[m.id]?.confidence ?? null,
     };
   }
   map[FINAL_MATCHUP.id] = {
-    teamA: winnerOf(SF_MATCHUPS[0].id),
-    teamB: winnerOf(SF_MATCHUPS[1].id),
-    winner: winnerOf(FINAL_MATCHUP.id),
-    confidence: knockoutPicks[FINAL_MATCHUP.id]?.confidence ?? null,
+    teamA: winnerOf(SF_MATCHUPS[0].id), teamB: winnerOf(SF_MATCHUPS[1].id),
+    winner: winnerOf(FINAL_MATCHUP.id), confidence: knockoutPicks[FINAL_MATCHUP.id]?.confidence ?? null,
   };
   map[THIRD_PLACE_MATCHUP.id] = {
-    teamA: loserOf(SF_MATCHUPS[0].id),
-    teamB: loserOf(SF_MATCHUPS[1].id),
-    winner: winnerOf(THIRD_PLACE_MATCHUP.id),
-    confidence: knockoutPicks[THIRD_PLACE_MATCHUP.id]?.confidence ?? null,
+    teamA: loserOf(SF_MATCHUPS[0].id), teamB: loserOf(SF_MATCHUPS[1].id),
+    winner: winnerOf(THIRD_PLACE_MATCHUP.id), confidence: knockoutPicks[THIRD_PLACE_MATCHUP.id]?.confidence ?? null,
   };
 
   return map;
@@ -133,24 +126,37 @@ export default function useBracket() {
   const [state, setState] = useState(loadState);
 
   useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    } catch (_) {}
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (_) {}
   }, [state]);
 
   const setGroupPick = useCallback((group, rank, teamId) => {
     setState((prev) => {
       const existing = prev.groupPicks[group] || {};
-      // Prevent picking same team for both positions
       const updated = { ...existing };
-      if (rank === 'first') {
-        if (updated.second === teamId) updated.second = null;
-        updated.first = teamId;
-      } else {
-        if (updated.first === teamId) updated.first = null;
-        updated.second = teamId;
+
+      // Clear this team from any other rank it already occupies
+      if (teamId) {
+        if (updated.first === teamId && rank !== 'first') updated.first = null;
+        if (updated.second === teamId && rank !== 'second') updated.second = null;
+        if (updated.third === teamId && rank !== 'third') updated.third = null;
       }
-      return { ...prev, groupPicks: { ...prev.groupPicks, [group]: updated } };
+
+      updated[rank] = teamId; // null to deselect
+      updated.fourth = deriveFourth(group, updated);
+
+      // If 3rd changes, clear bestThirdPicks for that group's old 3rd
+      let bestThirdPicks = prev.bestThirdPicks;
+      if (rank === 'third' || rank === 'first' || rank === 'second') {
+        // Remove any team from this group from bestThirdPicks since 3rd place changed
+        const groupTeamIds = GROUPS[group].teams.map((t) => t.id);
+        bestThirdPicks = bestThirdPicks.filter((id) => !groupTeamIds.includes(id));
+      }
+
+      return {
+        ...prev,
+        groupPicks: { ...prev.groupPicks, [group]: updated },
+        bestThirdPicks,
+      };
     });
   }, []);
 
@@ -184,10 +190,7 @@ export default function useBracket() {
       if (!existing) return prev;
       return {
         ...prev,
-        knockoutPicks: {
-          ...prev.knockoutPicks,
-          [matchId]: { ...existing, confidence },
-        },
+        knockoutPicks: { ...prev.knockoutPicks, [matchId]: { ...existing, confidence } },
       };
     });
   }, []);
@@ -200,9 +203,7 @@ export default function useBracket() {
     setState((prev) => ({ ...prev, userName: name }));
   }, []);
 
-  const resetAll = useCallback(() => {
-    setState(initialState());
-  }, []);
+  const resetAll = useCallback(() => { setState(initialState()); }, []);
 
   const exportJSON = useCallback(() => {
     const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
@@ -220,40 +221,33 @@ export default function useBracket() {
       try {
         const parsed = JSON.parse(e.target.result);
         setState({ ...initialState(), ...parsed });
-      } catch (_) {
-        alert('Invalid bracket file.');
-      }
+      } catch (_) { alert('Invalid bracket file.'); }
     };
     reader.readAsText(file);
   }, []);
 
-  // Derived data
+  // Group is complete when 1st, 2nd, and 3rd are all picked (4th auto-fills)
   const groupsComplete = GROUP_LETTERS.every((g) => {
     const p = state.groupPicks[g];
-    return p?.first && p?.second;
+    return p?.first && p?.second && p?.third;
   });
 
+  // Third-place teams come from explicit picks, not derivation
   const thirdPlaceTeams = GROUP_LETTERS.map((g) => {
     const picks = state.groupPicks[g];
-    const group = GROUPS[g];
-    const taken = [picks?.first, picks?.second].filter(Boolean);
-    const third = group.teams.find((t) => !taken.includes(t.id));
-    // Only return if both 1st and 2nd are picked
-    if (!picks?.first || !picks?.second) return null;
-    return { ...third, group: g };
+    if (!picks?.third) return null;
+    const team = getTeamById(picks.third);
+    return team ? { ...team, group: g } : null;
   }).filter(Boolean);
 
   const bestThirdComplete = state.bestThirdPicks.length === 8;
-
   const matchupMap = buildMatchupMap(state.groupPicks, state.bestThirdPicks, state.knockoutPicks);
-
-  const totalKnockoutPicks = Object.keys(matchupMap).length; // 33 matches total
   const madeKnockoutPicks = Object.values(state.knockoutPicks).filter((p) => p?.winnerId).length;
 
   const progress = {
     groupsDone: GROUP_LETTERS.filter((g) => {
       const p = state.groupPicks[g];
-      return p?.first && p?.second;
+      return p?.first && p?.second && p?.third;
     }).length,
     groupsTotal: 12,
     knockoutDone: madeKnockoutPicks,
@@ -277,6 +271,5 @@ export default function useBracket() {
     resetAll,
     exportJSON,
     importJSON,
-    getTeamById,
   };
 }
