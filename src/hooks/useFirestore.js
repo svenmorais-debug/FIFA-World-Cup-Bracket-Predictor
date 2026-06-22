@@ -29,13 +29,17 @@ export function useFirestore(userId) {
     if (!userId) { setBrackets([]); return; }
     setLoading(true);
     try {
+      // No orderBy here — avoids needing a composite Firestore index.
+      // Sort client-side instead.
       const q    = query(
         collection(db, 'brackets'),
         where('userId', '==', userId),
-        orderBy('lastUpdated', 'desc'),
       );
       const snap = await getDocs(q);
-      setBrackets(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+      const docs = snap.docs
+        .map(d => ({ id: d.id, ...d.data() }))
+        .sort((a, b) => (b.lastUpdated?.seconds ?? 0) - (a.lastUpdated?.seconds ?? 0));
+      setBrackets(docs);
     } finally {
       setLoading(false);
     }
