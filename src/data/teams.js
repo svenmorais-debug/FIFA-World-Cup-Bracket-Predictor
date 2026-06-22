@@ -109,7 +109,7 @@ export const GROUP_LETTERS = Object.keys(GROUPS);
 export const R32_MATCHUPS = [
   { id: 'R32_1',  slotA: '2A', slotB: '2B' },                              // Runner-up A vs Runner-up B
   { id: 'R32_2',  slotA: '1E', slotB: { t3: ['A','B','C','D','F'] } },     // Winner E vs 3rd (A/B/C/D/F)
-  { id: 'R32_3',  slotA: '1F', slotB: '2C' },                              // Winner F vs Runner-up C
+  { id: 'R32_3',  slotA: '2F', slotB: '2C' },                              // Runner-up F vs Runner-up C
   { id: 'R32_4',  slotA: '1C', slotB: '2F' },                              // Winner C vs Runner-up F
   { id: 'R32_5',  slotA: '1I', slotB: { t3: ['C','D','F','G','H'] } },     // Winner I vs 3rd (C/D/F/G/H)
   { id: 'R32_6',  slotA: '2E', slotB: '2I' },                              // Runner-up E vs Runner-up I
