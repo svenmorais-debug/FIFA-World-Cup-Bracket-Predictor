@@ -1,101 +1,100 @@
-// FIFA World Cup 2026 - 48 teams in 12 groups
-// Groups based on official FIFA 2026 draw (December 2024)
+// FIFA World Cup 2026 — 48 teams in 12 groups (official confirmed groups)
 
 export const GROUPS = {
   A: {
     teams: [
-      { id: 'USA', name: 'United States', flag: '🇺🇸', confederation: 'CONCACAF' },
-      { id: 'PAN', name: 'Panama', flag: '🇵🇦', confederation: 'CONCACAF' },
-      { id: 'URU', name: 'Uruguay', flag: '🇺🇾', confederation: 'CONMEBOL' },
-      { id: 'BOL', name: 'Bolivia', flag: '🇧🇴', confederation: 'CONMEBOL' },
+      { id: 'MEX', name: 'Mexico',      flag: '🇲🇽', confederation: 'CONCACAF' },
+      { id: 'KOR', name: 'South Korea', flag: '🇰🇷', confederation: 'AFC' },
+      { id: 'RSA', name: 'South Africa',flag: '🇿🇦', confederation: 'CAF' },
+      { id: 'CZE', name: 'Czechia',     flag: '🇨🇿', confederation: 'UEFA' },
     ],
   },
   B: {
     teams: [
-      { id: 'ARG', name: 'Argentina', flag: '🇦🇷', confederation: 'CONMEBOL' },
-      { id: 'CHI', name: 'Chile', flag: '🇨🇱', confederation: 'CONMEBOL' },
-      { id: 'MAR', name: 'Morocco', flag: '🇲🇦', confederation: 'CAF' },
-      { id: 'UKR', name: 'Ukraine', flag: '🇺🇦', confederation: 'UEFA' },
+      { id: 'CAN', name: 'Canada',               flag: '🇨🇦', confederation: 'CONCACAF' },
+      { id: 'SUI', name: 'Switzerland',           flag: '🇨🇭', confederation: 'UEFA' },
+      { id: 'QAT', name: 'Qatar',                 flag: '🇶🇦', confederation: 'AFC' },
+      { id: 'BIH', name: 'Bosnia and Herzegovina',flag: '🇧🇦', confederation: 'UEFA' },
     ],
   },
   C: {
     teams: [
-      { id: 'MEX', name: 'Mexico', flag: '🇲🇽', confederation: 'CONCACAF' },
-      { id: 'ECU', name: 'Ecuador', flag: '🇪🇨', confederation: 'CONMEBOL' },
-      { id: 'CRO', name: 'Croatia', flag: '🇭🇷', confederation: 'UEFA' },
-      { id: 'SEN', name: 'Senegal', flag: '🇸🇳', confederation: 'CAF' },
+      { id: 'BRA', name: 'Brazil',  flag: '🇧🇷', confederation: 'CONMEBOL' },
+      { id: 'MAR', name: 'Morocco', flag: '🇲🇦', confederation: 'CAF' },
+      { id: 'SCO', name: 'Scotland',flag: '🏴󠁧󠁢󠁳󠁣󠁴󠁿', confederation: 'UEFA' },
+      { id: 'HAI', name: 'Haiti',   flag: '🇭🇹', confederation: 'CONCACAF' },
     ],
   },
   D: {
     teams: [
-      { id: 'POR', name: 'Portugal', flag: '🇵🇹', confederation: 'UEFA' },
-      { id: 'BRA', name: 'Brazil', flag: '🇧🇷', confederation: 'CONMEBOL' },
-      { id: 'ENG', name: 'England', flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿', confederation: 'UEFA' },
-      { id: 'TRI', name: 'Trinidad & Tobago', flag: '🇹🇹', confederation: 'CONCACAF' },
+      { id: 'USA', name: 'United States', flag: '🇺🇸', confederation: 'CONCACAF' },
+      { id: 'AUS', name: 'Australia',     flag: '🇦🇺', confederation: 'AFC' },
+      { id: 'PAR', name: 'Paraguay',      flag: '🇵🇾', confederation: 'CONMEBOL' },
+      { id: 'TUR', name: 'Türkiye',       flag: '🇹🇷', confederation: 'UEFA' },
     ],
   },
   E: {
     teams: [
-      { id: 'COD', name: 'DR Congo', flag: '🇨🇩', confederation: 'CAF' },
-      { id: 'GER', name: 'Germany', flag: '🇩🇪', confederation: 'UEFA' },
-      { id: 'JPN', name: 'Japan', flag: '🇯🇵', confederation: 'AFC' },
-      { id: 'PAR', name: 'Paraguay', flag: '🇵🇾', confederation: 'CONMEBOL' },
+      { id: 'GER', name: 'Germany',      flag: '🇩🇪', confederation: 'UEFA' },
+      { id: 'ECU', name: 'Ecuador',      flag: '🇪🇨', confederation: 'CONMEBOL' },
+      { id: 'CIV', name: 'Ivory Coast',  flag: '🇨🇮', confederation: 'CAF' },
+      { id: 'CUW', name: 'Curaçao',      flag: '🇨🇼', confederation: 'CONCACAF' },
     ],
   },
   F: {
     teams: [
-      { id: 'SPA', name: 'Spain', flag: '🇪🇸', confederation: 'UEFA' },
       { id: 'NED', name: 'Netherlands', flag: '🇳🇱', confederation: 'UEFA' },
-      { id: 'TUR', name: 'Turkey', flag: '🇹🇷', confederation: 'UEFA' },
-      { id: 'IDN', name: 'Indonesia', flag: '🇮🇩', confederation: 'AFC' },
+      { id: 'JPN', name: 'Japan',       flag: '🇯🇵', confederation: 'AFC' },
+      { id: 'SWE', name: 'Sweden',      flag: '🇸🇪', confederation: 'UEFA' },
+      { id: 'TUN', name: 'Tunisia',     flag: '🇹🇳', confederation: 'CAF' },
     ],
   },
   G: {
     teams: [
-      { id: 'CAN', name: 'Canada', flag: '🇨🇦', confederation: 'CONCACAF' },
-      { id: 'COL', name: 'Colombia', flag: '🇨🇴', confederation: 'CONMEBOL' },
-      { id: 'AUS', name: 'Australia', flag: '🇦🇺', confederation: 'AFC' },
-      { id: 'CMR', name: 'Cameroon', flag: '🇨🇲', confederation: 'CAF' },
+      { id: 'BEL', name: 'Belgium',     flag: '🇧🇪', confederation: 'UEFA' },
+      { id: 'IRN', name: 'Iran',        flag: '🇮🇷', confederation: 'AFC' },
+      { id: 'EGY', name: 'Egypt',       flag: '🇪🇬', confederation: 'CAF' },
+      { id: 'NZL', name: 'New Zealand', flag: '🇳🇿', confederation: 'OFC' },
     ],
   },
   H: {
     teams: [
-      { id: 'FRA', name: 'France', flag: '🇫🇷', confederation: 'UEFA' },
-      { id: 'BEL', name: 'Belgium', flag: '🇧🇪', confederation: 'UEFA' },
-      { id: 'NGA', name: 'Nigeria', flag: '🇳🇬', confederation: 'CAF' },
-      { id: 'VNM', name: 'Vietnam', flag: '🇻🇳', confederation: 'AFC' },
+      { id: 'SPA', name: 'Spain',       flag: '🇪🇸', confederation: 'UEFA' },
+      { id: 'URU', name: 'Uruguay',     flag: '🇺🇾', confederation: 'CONMEBOL' },
+      { id: 'SAU', name: 'Saudi Arabia',flag: '🇸🇦', confederation: 'AFC' },
+      { id: 'CPV', name: 'Cape Verde',  flag: '🇨🇻', confederation: 'CAF' },
     ],
   },
   I: {
     teams: [
-      { id: 'KOR', name: 'South Korea', flag: '🇰🇷', confederation: 'AFC' },
-      { id: 'NOR', name: 'Norway', flag: '🇳🇴', confederation: 'UEFA' },
-      { id: 'CRI', name: 'Costa Rica', flag: '🇨🇷', confederation: 'CONCACAF' },
-      { id: 'GRE', name: 'Greece', flag: '🇬🇷', confederation: 'UEFA' },
+      { id: 'FRA', name: 'France',  flag: '🇫🇷', confederation: 'UEFA' },
+      { id: 'SEN', name: 'Senegal', flag: '🇸🇳', confederation: 'CAF' },
+      { id: 'IRQ', name: 'Iraq',    flag: '🇮🇶', confederation: 'AFC' },
+      { id: 'NOR', name: 'Norway',  flag: '🇳🇴', confederation: 'UEFA' },
     ],
   },
   J: {
     teams: [
-      { id: 'SAU', name: 'Saudi Arabia', flag: '🇸🇦', confederation: 'AFC' },
-      { id: 'DEN', name: 'Denmark', flag: '🇩🇰', confederation: 'UEFA' },
-      { id: 'ALG', name: 'Algeria', flag: '🇩🇿', confederation: 'CAF' },
-      { id: 'SUI', name: 'Switzerland', flag: '🇨🇭', confederation: 'UEFA' },
+      { id: 'ARG', name: 'Argentina', flag: '🇦🇷', confederation: 'CONMEBOL' },
+      { id: 'ALG', name: 'Algeria',   flag: '🇩🇿', confederation: 'CAF' },
+      { id: 'AUT', name: 'Austria',   flag: '🇦🇹', confederation: 'UEFA' },
+      { id: 'JOR', name: 'Jordan',    flag: '🇯🇴', confederation: 'AFC' },
     ],
   },
   K: {
     teams: [
-      { id: 'IRN', name: 'Iran', flag: '🇮🇷', confederation: 'AFC' },
-      { id: 'NZL', name: 'New Zealand', flag: '🇳🇿', confederation: 'OFC' },
-      { id: 'ITA', name: 'Italy', flag: '🇮🇹', confederation: 'UEFA' },
-      { id: 'SRB', name: 'Serbia', flag: '🇷🇸', confederation: 'UEFA' },
+      { id: 'POR', name: 'Portugal',  flag: '🇵🇹', confederation: 'UEFA' },
+      { id: 'COL', name: 'Colombia',  flag: '🇨🇴', confederation: 'CONMEBOL' },
+      { id: 'UZB', name: 'Uzbekistan',flag: '🇺🇿', confederation: 'AFC' },
+      { id: 'COD', name: 'DR Congo',  flag: '🇨🇩', confederation: 'CAF' },
     ],
   },
   L: {
     teams: [
-      { id: 'AUT', name: 'Austria', flag: '🇦🇹', confederation: 'UEFA' },
-      { id: 'VEN', name: 'Venezuela', flag: '🇻🇪', confederation: 'CONMEBOL' },
-      { id: 'EGY', name: 'Egypt', flag: '🇪🇬', confederation: 'CAF' },
-      { id: 'PER', name: 'Peru', flag: '🇵🇪', confederation: 'CONMEBOL' },
+      { id: 'ENG', name: 'England', flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿', confederation: 'UEFA' },
+      { id: 'CRO', name: 'Croatia', flag: '🇭🇷', confederation: 'UEFA' },
+      { id: 'GHA', name: 'Ghana',   flag: '🇬🇭', confederation: 'CAF' },
+      { id: 'PAN', name: 'Panama',  flag: '🇵🇦', confederation: 'CONCACAF' },
     ],
   },
 };
@@ -146,5 +145,5 @@ export const SF_MATCHUPS = [
   { id: 'SF_2', fromA: 'QF_3', fromB: 'QF_4' },
 ];
 
-export const FINAL_MATCHUP = { id: 'FINAL', fromA: 'SF_1', fromB: 'SF_2' };
+export const FINAL_MATCHUP      = { id: 'FINAL', fromA: 'SF_1', fromB: 'SF_2' };
 export const THIRD_PLACE_MATCHUP = { id: 'THIRD', fromLoserA: 'SF_1', fromLoserB: 'SF_2' };
