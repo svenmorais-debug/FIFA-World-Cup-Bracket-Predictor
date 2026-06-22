@@ -133,7 +133,6 @@ export default function App() {
           <KnockoutBracket
             matchupMap={matchupMap}
             onPick={setKnockoutPick}
-            onConfidence={setConfidence}
             onBack={() => setStage('group')}
             thirdAssignmentValid={thirdAssignmentValid}
           />
